@@ -98,6 +98,7 @@
     </button>
 </form>
 
+    @if(cms_addon('google_news_sitemap', false))
     <!-- Technical SEO & Sitemaps Box -->
     <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs mt-6">
         <h3 class="text-base font-bold text-slate-900 mb-1">Technical SEO & Google Sitemaps</h3>
@@ -110,7 +111,7 @@
                     <button type="button" onclick="navigator.clipboard.writeText('{{ url('/sitemap.xml') }}'); this.innerText='Copied!'" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold shrink-0 cursor-pointer">Copy</button>
                 </div>
             </div>
-            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+<div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div class="font-bold text-slate-700 mb-1">Google News Sitemap (48h)</div>
                 <div class="flex items-center justify-between gap-2">
                     <a href="{{ url('/news-sitemap.xml') }}" target="_blank" class="text-blue-600 hover:underline truncate">{{ url('/news-sitemap.xml') }}</a>
@@ -126,4 +127,5 @@
             </div>
         </div>
     </div>
+    @endif
 @endsection

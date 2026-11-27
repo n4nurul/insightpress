@@ -48,6 +48,12 @@ class AddonController extends Controller
                 'category' => 'Newsroom',
                 'default' => true,
             ],
+            'rss_importer' => [
+                'name' => 'RSS / Demo News Importer',
+                'description' => 'Import demo or syndicated news articles with images directly from any external portal RSS feed URL in one click.',
+                'category' => 'Tools & Demo',
+                'default' => true,
+            ],
         ];
     }
 

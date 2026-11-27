@@ -23,7 +23,7 @@ class ThemeRenderController extends Controller
         $slug = urldecode($slug);
         $category = Category::where('slug', $slug)->where('is_active', true)->firstOrFail();
         $posts = Post::published()
-            ->where('category_id', $category->id)
+            ->inCategory($category->id)
             ->latest('published_at')
             ->paginate(12);
 

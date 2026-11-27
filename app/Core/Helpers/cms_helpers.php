@@ -79,3 +79,34 @@ if (!function_exists('bn_number')) {
         return str_replace(['0','1','2','3','4','5','6','7','8','9'], ['০','১','২','৩','৪','৫','৬','৭','৮','৯'], (string) $number);
     }
 }
+
+
+if (!function_exists('available_themes')) {
+    function available_themes(): array
+    {
+        return [
+            'sylhet-view' => 'Sylhet View (Classic Red & Navy)',
+            'sylhet-modern' => 'Sylhet Modern (Emerald Portal)',
+            'news-classic' => 'News Classic (Standard News)',
+            'corporate-clean' => 'Corporate Clean (Business & Agency)',
+        ];
+    }
+}
+
+if (!function_exists('cms_theme_menu')) {
+    function cms_theme_menu(string $location = 'header', ?string $theme = null)
+    {
+        $theme = $theme ?: cms_setting('active_theme', 'news-classic');
+        $cacheKey = "theme_menu_{$theme}_{$location}";
+
+        return Cache::rememberForever($cacheKey, function () use ($theme, $location) {
+            return \App\Models\ThemeMenu::with('children')
+                ->where('theme', $theme)
+                ->where('location', $location)
+                ->whereNull('parent_id')
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get();
+        });
+    }
+}

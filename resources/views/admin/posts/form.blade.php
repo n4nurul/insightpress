@@ -225,14 +225,26 @@
                 </div>
 
                 @if(in_array($type, ['news', 'service']))
+                @php
+                    $selectedCatIds = old('category_ids', isset($post)
+                        ? $post->categories()->pluck('categories.id')->push($post->category_id)->filter()->unique()->toArray()
+                        : (request('category_id') ? [(int) request('category_id')] : []));
+                @endphp
                 <div>
-                    <label class="block font-semibold mb-1">Category / Area</label>
-                    <select name="category_id" class="w-full px-3 py-2 border rounded-lg">
-                        <option value="">-- Select Category --</option>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block font-semibold">Categories (একাধিক সিলেক্ট করা যাবে)</label>
+                    </div>
+                    <div class="max-h-48 overflow-y-auto border rounded-lg p-2.5 bg-slate-50 space-y-1.5">
                         @foreach($categories as $cat)
-                            <option value="{{ $cat->id }}" {{ ($post->category_id ?? '') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                            <label class="flex items-center gap-2 text-sm text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                                <input type="checkbox" name="category_ids[]" value="{{ $cat->id }}"
+                                       {{ in_array($cat->id, $selectedCatIds) ? 'checked' : '' }}
+                                       class="rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                <span>{{ $cat->name }}</span>
+                            </label>
                         @endforeach
-                    </select>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-1">প্রথম সিলেক্ট করা ক্যাটাগরিটি প্রাইমারি ব্যাজ হিসেবে দেখাবে।</p>
                 </div>
                 @endif
 

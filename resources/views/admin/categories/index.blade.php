@@ -129,7 +129,8 @@
                         <tr>
                             <th class="px-5 py-3.5">Name</th>
                             <th class="px-4 py-3.5">Parent</th>
-                            <th class="px-4 py-3.5">Order</th>
+                            <th class="px-4 py-3.5 text-center">Posts</th>
+                            <th class="px-4 py-3.5 text-center">Order</th>
                             <th class="px-5 py-3.5 text-right">Action</th>
                         </tr>
                     </thead>
@@ -138,10 +139,15 @@
                         <tr class="hover:bg-slate-50/80 transition">
                             <td class="px-5 py-3.5 font-bold text-slate-900">
                                 {{ $cat->name }}
-                                
                             </td>
                             <td class="px-4 py-3.5 text-slate-600">{{ $cat->parent?->name ?? '-' }}</td>
-                            <td class="px-4 py-3.5 font-semibold text-slate-700">{{ $cat->sort_order }}</td>
+                            <td class="px-4 py-3.5 text-center">
+                                <a href="{{ route('admin.posts.index', ['type' => $cat->type ?: 'news', 'category_id' => $cat->id]) }}"
+                                   class="inline-flex items-center justify-center min-w-7 px-2.5 py-0.5 rounded-full text-xs font-bold {{ ($cat->total_posts_count ?? 0) > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500' }}">
+                                    {{ $cat->total_posts_count ?? 0 }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-3.5 text-center font-semibold text-slate-700">{{ $cat->sort_order }}</td>
                             <td class="px-5 py-3.5 text-right whitespace-nowrap space-x-3">
                                 <button type="button"
                                         @click='startEdit(@json($cat))'
@@ -160,7 +166,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-slate-400">No categories found.</td>
+                            <td colspan="5" class="px-6 py-8 text-center text-slate-400">No categories found.</td>
                         </tr>
                         @endforelse
                     </tbody>

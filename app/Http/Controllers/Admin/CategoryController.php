@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -11,7 +12,13 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::with('parent')->orderBy('sort_order')->get();
+        $categories = Category::with('parent')
+            ->orderBy('sort_order')
+            ->get()
+            ->each(function ($cat) {
+                $cat->total_posts_count = Post::inCategory($cat->id)->count();
+            });
+
         $parents = Category::whereNull('parent_id')->orderBy('sort_order')->get();
         return view('admin.categories.index', compact('categories', 'parents'));
     }

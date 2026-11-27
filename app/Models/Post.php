@@ -25,7 +25,12 @@ class Post extends Model
 
     protected static function booted(): void
     {
-        static::saved(fn () => Cache::flush());
+        static::saved(function (Post $post) {
+            if ($post->category_id) {
+                $post->categories()->syncWithoutDetaching([$post->category_id]);
+            }
+            Cache::flush();
+        });
         static::deleted(fn () => Cache::flush());
     }
 
@@ -34,9 +39,22 @@ class Post extends Model
         return $this->belongsTo(Category::class);
     }
 
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'category_post');
+    }
+
     public function author()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function scopeInCategory($query, int $categoryId)
+    {
+        return $query->where(function ($q) use ($categoryId) {
+            $q->where('category_id', $categoryId)
+              ->orWhereHas('categories', fn ($cq) => $cq->where('categories.id', $categoryId));
+        });
     }
 
     public function scopePublished($query)

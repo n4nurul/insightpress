@@ -14,7 +14,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root { --brand: {{ cms_setting('primary_color', '#007a5e') }}; }
@@ -36,7 +36,52 @@
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ cms_setting('adsense_client') }}" crossorigin="anonymous"></script>
     @endif
     {!! cms_setting('custom_header_code') !!}
+
+    
+
+    
+    <style id="prothomalo-typography">
+        /* Scale up root rem so Noto Serif Bengali matches Hind Siliguri visual size */
+        html {
+            font-size: 17px;
+        }
+        @media (min-width: 1024px) {
+            html {
+                font-size: 17.5px;
+            }
+        }
+        body, nav, button, input, select {
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+        h1, h2, h3, h4, .article-content, .article-content p {
+            font-family: 'Noto Serif Bengali', 'Hind Siliguri', serif;
+            letter-spacing: -0.01em;
+        }
+        h1, h2, h3, h4 {
+            line-height: 1.42 !important;
+        }
+        /* Single article body inherits alpine fontSize (A- / A+ compatible) */
+        .article-content {
+            font-size: 19px;
+            line-height: 1.8;
+            color: #1e293b;
+        }
+        .article-content p {
+            font-size: inherit;
+            line-height: 1.8;
+            margin-bottom: 1.25rem;
+        }
+        @media (min-width: 1024px) {
+            .article-content {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
+@php
+    $themeHeaderMenu = cms_theme_menu('header', 'sylhet-modern');
+    $themeFooterMenu = cms_theme_menu('footer', 'sylhet-modern');
+@endphp
 <body class="min-h-screen flex flex-col antialiased" x-data="{ mobileOpen: false, searchBar: false }">
     @php
         $siteName = cms_setting('site_name', 'সিলেট টুডে ২৪');
@@ -95,6 +140,29 @@
     <header class="sticky top-0 z-40 bg-white border-y border-slate-200 shadow-xs">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-12 flex items-center justify-between">
             <nav class="hidden lg:flex items-center gap-1 text-[15px] font-bold text-slate-800">
+@if($themeHeaderMenu->count() > 0)
+    @foreach($themeHeaderMenu as $mItem)
+        @if($mItem->children->count() > 0)
+            <div class="relative" x-data="{ sub: false }" @mouseenter="sub = true" @mouseleave="sub = false">
+                <a href="{{ url($mItem->url) }}" {{ $mItem->open_new_tab ? 'target="_blank"' : '' }} class="px-3.5 py-3 border-b-2 border-transparent hover:text-brand transition flex items-center gap-1">
+                    <span>{{ $mItem->label }}</span>
+                    <span class="text-[10px] text-slate-400">▼</span>
+                </a>
+                <div x-show="sub" style="display: none;" class="absolute left-0 top-full w-44 bg-white rounded-b-xl shadow-lg border border-slate-200 py-1.5 z-50">
+                    @foreach($mItem->children as $mChild)
+                        <a href="{{ url($mChild->url) }}" {{ $mChild->open_new_tab ? 'target="_blank"' : '' }} class="block px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-brand">
+                            {{ $mChild->label }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @else
+            <a href="{{ url($mItem->url) }}" {{ $mItem->open_new_tab ? 'target="_blank"' : '' }} class="px-3.5 py-3 border-b-2 border-transparent hover:text-brand transition whitespace-nowrap">
+                {{ $mItem->label }}
+            </a>
+        @endif
+    @endforeach
+@else
                 <a href="{{ route('home') }}" class="px-3.5 py-3 border-b-2 transition {{ request()->routeIs('home') ? 'border-brand text-brand' : 'border-transparent hover:text-brand' }}">
                     প্রচ্ছদ
                 </a>
@@ -120,6 +188,7 @@
                     @endif
                 @endforeach
             </nav>
+@endif
 
             <!-- Mobile Drawer Toggle & Search Icon -->
             <div class="flex items-center justify-between w-full lg:w-auto gap-2">
@@ -145,6 +214,14 @@
 
         <!-- Mobile Menu -->
         <div x-show="mobileOpen" x-transition style="display: none;" class="lg:hidden bg-white border-t border-slate-200 px-4 py-3 space-y-1 text-sm font-bold max-h-[75vh] overflow-y-auto">
+@if($themeHeaderMenu->count() > 0)
+    @foreach($themeHeaderMenu as $mItem)
+        <a href="{{ url($mItem->url) }}" class="block py-2 border-t border-slate-100 text-slate-800 hover:text-brand">{{ $mItem->label }}</a>
+        @foreach($mItem->children as $mChild)
+            <a href="{{ url($mChild->url) }}" class="block py-1.5 pl-5 text-xs text-slate-600">• {{ $mChild->label }}</a>
+        @endforeach
+    @endforeach
+@else
             <a href="{{ route('home') }}" class="block py-2 text-brand">প্রচ্ছদ</a>
             @foreach($menuCategories ?? [] as $cat)
                 <a href="{{ route('category.show', $cat->slug) }}" class="block py-2 border-t border-slate-100 text-slate-800 hover:text-brand">
@@ -156,6 +233,7 @@
                     </a>
                 @endforeach
             @endforeach
+@endif
         </div>
     </header>
 
@@ -200,9 +278,15 @@
             <div>
                 <h4 class="text-sm font-bold text-slate-900 mb-3 border-b pb-1.5">গুরুত্বপূর্ণ বিভাগ</h4>
                 <div class="grid grid-cols-2 gap-2 text-xs font-semibold text-slate-600">
-                    @foreach(($menuCategories ?? collect())->take(8) as $cat)
+                    @if($themeFooterMenu->count() > 0)
+    @foreach($themeFooterMenu as $fItem)
+        <a href="{{ url($fItem->url) }}" {{ $fItem->open_new_tab ? 'target="_blank"' : '' }} class="hover:text-brand">{{ $fItem->label }}</a>
+    @endforeach
+@else
+    @foreach(($menuCategories ?? collect())->take(8) as $cat)
                         <a href="{{ route('category.show', $cat->slug) }}" class="hover:text-brand">{{ $cat->name }}</a>
                     @endforeach
+@endif
                 </div>
             </div>
 

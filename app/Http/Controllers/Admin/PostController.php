@@ -49,7 +49,7 @@ class PostController extends Controller
 
         // Category Filter
         if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
+            $query->inCategory((int) $request->category_id);
         }
 
         // Month-Year Date Filter (YYYY-MM)
@@ -148,8 +148,15 @@ class PostController extends Controller
         $data['published_at'] = $this->resolvePublishedAt($request);
         $data['meta_data'] = $request->input('meta_data', []);
 
-        unset($data['publish_date'], $data['publish_time']);
-        Post::create($data);
+        $catIds = collect($request->input('category_ids', []))->filter()->map(fn($id) => (int) $id)->unique()->values();
+        if ($catIds->isEmpty() && !empty($data['category_id'])) {
+            $catIds = collect([(int) $data['category_id']]);
+        }
+        $data['category_id'] = $catIds->first();
+
+        unset($data['publish_date'], $data['publish_time'], $data['category_ids']);
+        $post = Post::create($data);
+        $post->categories()->sync($catIds->all());
 
         return redirect()->route('admin.posts.index', ['type' => $data['type']])
             ->with('success', $user->isEditor() ? 'Saved successfully.' : 'Submitted for editorial review (Draft).');
@@ -195,8 +202,15 @@ class PostController extends Controller
         $data['published_at'] = $this->resolvePublishedAt($request, $post->published_at);
         $data['meta_data'] = array_merge($post->meta_data ?? [], $request->input('meta_data', []));
 
-        unset($data['publish_date'], $data['publish_time']);
+        $catIds = collect($request->input('category_ids', []))->filter()->map(fn($id) => (int) $id)->unique()->values();
+        if ($catIds->isEmpty() && !empty($data['category_id'])) {
+            $catIds = collect([(int) $data['category_id']]);
+        }
+        $data['category_id'] = $catIds->first();
+
+        unset($data['publish_date'], $data['publish_time'], $data['category_ids']);
         $post->update($data);
+        $post->categories()->sync($catIds->all());
 
         return redirect()->route('admin.posts.index', ['type' => $post->type])
             ->with('success', 'Updated successfully.');
@@ -281,6 +295,8 @@ class PostController extends Controller
         return $request->validate([
             'type' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'exists:categories,id',
             'sub_title' => 'nullable|string|max:255',
             'title' => 'required|string|max:255',
             'slug' => 'nullable|string|max:255',

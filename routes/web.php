@@ -6,10 +6,11 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EditorUploadController;
 use App\Http\Controllers\Admin\MediaController;
+use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\PostController;
+use App\Http\Controllers\Admin\RssImporterController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Frontend\SitemapController;
 use App\Http\Controllers\Frontend\ThemeRenderController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +28,13 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/quick-breaking', [DashboardController::class, 'saveQuickBreaking'])->name('quick-breaking.save');
     Route::post('/clear-cache', [DashboardController::class, 'clearCache'])->name('clear-cache');
     Route::resource('categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('/menus', [MenuController::class, 'index'])->name('menus.index');
+    Route::post('/menus', [MenuController::class, 'store'])->name('menus.store');
+    Route::post('/menus/bulk-categories', [MenuController::class, 'bulkAddCategories'])->name('menus.bulk-categories');
+    Route::post('/menus/bulk-pages', [MenuController::class, 'bulkAddPages'])->name('menus.bulk-pages');
+    Route::post('/menus/save-tree', [MenuController::class, 'saveTree'])->name('menus.save-tree');
+    Route::put('/menus/{menu}', [MenuController::class, 'update'])->name('menus.update');
+    Route::delete('/menus/{menu}', [MenuController::class, 'destroy'])->name('menus.destroy');
     Route::post('posts/bulk', [PostController::class, 'bulkAction'])->name('posts.bulk');
     Route::resource('posts', PostController::class)->except(['show']);
     Route::post('posts/{post}/archive', [PostController::class, 'archive'])->name('posts.archive');
@@ -47,14 +55,15 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/addons', [AddonController::class, 'index'])->name('addons.index');
         Route::post('/addons/{key}/toggle', [AddonController::class, 'toggle'])->name('addons.toggle');
+        Route::get('/rss-importer', [RssImporterController::class, 'index'])->name('rss-importer.index');
+        Route::post('/rss-importer', [RssImporterController::class, 'import'])->name('rss-importer.import');
+        Route::post('/rss-importer/single-url', [RssImporterController::class, 'importSingleUrl'])->name('rss-importer.import-url');
         Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingController::class, 'update'])->name('settings.update');
     });
 });
 
 // Public Frontend & SEO Routes
-
-// SEO Sitemaps & Robots
 Route::get('/sitemap.xml', [\App\Http\Controllers\Frontend\SeoController::class, 'sitemap'])->name('seo.sitemap');
 Route::get('/news-sitemap.xml', [\App\Http\Controllers\Frontend\SeoController::class, 'newsSitemap'])->name('seo.news_sitemap');
 Route::get('/robots.txt', [\App\Http\Controllers\Frontend\SeoController::class, 'robots'])->name('seo.robots');
