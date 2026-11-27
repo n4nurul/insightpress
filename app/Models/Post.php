@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Cache;
 
 class Post extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
         'user_id', 'category_id', 'type', 'sub_title', 'title', 'slug',
         'excerpt', 'body', 'featured_image', 'video_url', 'is_breaking',

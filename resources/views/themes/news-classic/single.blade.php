@@ -31,7 +31,7 @@
         <div class="flex flex-wrap items-center justify-between gap-3 py-3 my-4 border-y border-slate-100 text-xs text-slate-500">
             <div>
                 <span>✍️ {{ $post->meta_data['reporter'] ?? 'নিজস্ব প্রতিবেদক' }}</span> |
-                <span>🕒 {{ bn_date($post->published_at) }}</span> |
+                <span>🕒 {{ bn_datetime($post->published_at) }}</span> |
                 <span>👁️ {{ $post->views_count }} বার পঠিত</span>
             </div>
             <div class="flex items-center gap-2">
@@ -47,7 +47,19 @@
             <img id="newsImg" src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" class="w-full rounded-xl mb-6 max-h-[460px] object-cover">
         @endif
 
-        <div class="prose max-w-none text-slate-800 text-base md:text-lg leading-relaxed whitespace-pre-line">
+        <style>
+    .article-content ul { list-style-type: disc; padding-left: 1.5rem; margin: 1rem 0; }
+    .article-content ol { list-style-type: decimal; padding-left: 1.5rem; margin: 1rem 0; }
+    .article-content blockquote { border-left: 4px solid #dc2626; padding-left: 1rem; font-style: italic; color: #475569; margin: 1rem 0; }
+    .article-content .ql-align-center { text-align: center; }
+    .article-content .ql-align-right { text-align: right; }
+    .article-content .ql-align-justify { text-align: justify; }
+    .article-content img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 1rem 0; }
+    .article-content h2 { font-size: 1.5rem; font-weight: 700; margin: 1.25rem 0 0.5rem; }
+    .article-content h3 { font-size: 1.25rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+    .article-content a { color: #2563eb; text-decoration: underline; }
+    </style>
+<div class="article-content prose max-w-none text-slate-800 text-base md:text-lg leading-relaxed whitespace-pre-line">
             {{ $post->body }}
         </div>
     </article>
@@ -81,7 +93,7 @@ function downloadPhotocard() {
     const ctx = canvas.getContext('2d');
     const siteName = @json(cms_setting('site_name', 'সিলেট প্রতিদিন ২৪'));
     const title = @json($post->title);
-    const dateStr = @json(bn_date($post->published_at));
+    const dateStr = @json(bn_datetime($post->published_at));
     const primary = @json(cms_setting('primary_color', '#dc2626'));
 
     ctx.fillStyle = '#0f172a';

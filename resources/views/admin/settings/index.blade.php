@@ -66,7 +66,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-xl border border-slate-200 space-y-4 text-sm">
-        <h2 class="font-bold text-slate-800 border-b pb-2">3. Global SEO, Facebook Pixel & Google AdSense</h2>
+        <h2 class="font-bold text-slate-800 border-b pb-2">3. Global SEO, Analytics & Header/Footer Code Injection</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block font-semibold mb-1">Facebook Pixel ID</label>
@@ -79,6 +79,14 @@
             <div class="md:col-span-2">
                 <label class="block font-semibold mb-1">Default SEO Meta Description</label>
                 <textarea name="default_meta_desc" rows="2" class="w-full px-3 py-2 border rounded-lg">{{ $settings['default_meta_desc'] ?? '' }}</textarea>
+            </div>
+            <div>
+                <label class="block font-semibold mb-1">Custom Header Code (&lt;head&gt; — Search Console / GA4)</label>
+                <textarea name="custom_header_code" rows="4" placeholder="<meta name='google-site-verification' ...>" class="w-full px-3 py-2 border rounded-lg font-mono text-xs">{{ $settings['custom_header_code'] ?? '' }}</textarea>
+            </div>
+            <div>
+                <label class="block font-semibold mb-1">Custom Footer Code (Before &lt;/body&gt; — Chat / Scripts)</label>
+                <textarea name="custom_footer_code" rows="4" placeholder="<script>...</script>" class="w-full px-3 py-2 border rounded-lg font-mono text-xs">{{ $settings['custom_footer_code'] ?? '' }}</textarea>
             </div>
         </div>
     </div>

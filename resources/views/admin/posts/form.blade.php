@@ -2,6 +2,34 @@
 @section('title', isset($post) ? 'Edit Content' : 'Create New (' . strtoupper($type) . ')')
 
 @section('content')
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<style>
+    .ql-toolbar.ql-snow {
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        background-color: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    .ql-container.ql-snow {
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        border-color: #cbd5e1;
+        min-height: 320px;
+        font-size: 15px;
+        line-height: 1.75;
+    }
+    .ql-editor img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 0.75rem 0;
+    }
+</style>
+
+@php
+    $pubDateTime = isset($post) && $post->published_at ? $post->published_at : now();
+@endphp
+
 <form action="{{ isset($post) ? route('admin.posts.update', $post) : route('admin.posts.store') }}" method="POST" enctype="multipart/form-data"
       x-data="rankMathSeo({
           title: @js(old('title', $post->title ?? '')),
@@ -10,7 +38,9 @@
           keyword: @js(old('focus_keyword', $post->focus_keyword ?? '')),
           metaTitle: @js(old('meta_title', $post->meta_title ?? '')),
           metaDesc: @js(old('meta_description', $post->meta_description ?? '')),
-          hasImage: {{ isset($post) && $post->featured_image ? 'true' : 'false' }}
+          hasImage: {{ isset($post) && $post->featured_image ? 'true' : 'false' }},
+          pubDate: @js(old('publish_date', $pubDateTime->format('Y-m-d'))),
+          pubTime: @js(old('publish_time', $pubDateTime->format('H:i:s')))
       })">
     @csrf
     @if(isset($post)) @method('PUT') @endif
@@ -32,15 +62,16 @@
                     <label class="block text-sm font-semibold mb-1">
                         {{ $type === 'team' ? 'Full Name *' : ($type === 'ad' ? 'Ad Title *' : 'Title *') }}
                     </label>
-                    <input type="text" name="title" x-model="title" required class="w-full px-3.5 py-2.5 border rounded-lg font-semibold">
+                    <input type="text" name="title" x-model="title" @input="autoSlug()" required class="w-full px-3.5 py-2.5 border rounded-lg font-semibold">
                 </div>
 
-                @if(isset($post))
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 mb-1">URL Slug</label>
-                    <input type="text" name="slug" x-model="slug" class="w-full px-3 py-1.5 border rounded-lg text-xs bg-slate-50">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Custom URL Slug (Editable)</label>
+                    <div class="flex items-center border rounded-lg overflow-hidden bg-slate-50 text-xs">
+                        <span class="px-3 py-2 text-slate-400 bg-slate-100 border-r select-none">{{ url('/') }}/</span>
+                        <input type="text" name="slug" x-model="slug" @input="slugEdited = true" placeholder="auto-generated-from-title" class="w-full px-3 py-2 bg-white focus:outline-none text-slate-800 font-medium">
+                    </div>
                 </div>
-                @endif
 
                 @if($type === 'team')
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -85,8 +116,16 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold mb-1">Content Body</label>
-                    <textarea name="body" x-model="body" rows="12" class="w-full px-3.5 py-2.5 border rounded-lg text-sm leading-relaxed">{{ old('body', $post->body ?? '') }}</textarea>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-semibold">Content Body</label>
+                        <span x-show="uploadingImage" class="text-xs font-semibold text-emerald-600 animate-pulse">Uploading image...</span>
+                    </div>
+                    <!-- Hidden textarea synced with Quill HTML -->
+                    <textarea name="body" x-model="body" class="hidden">{{ old('body', $post->body ?? '') }}</textarea>
+                    <!-- Rich Text Editor Container -->
+                    <div wire:ignore>
+                        <div id="quill-editor">{!! old('body', $post->body ?? '') !!}</div>
+                    </div>
                 </div>
                 @endif
             </div>
@@ -161,7 +200,28 @@
                     <select name="status" class="w-full px-3 py-2 border rounded-lg">
                         <option value="published" {{ ($post->status ?? '') === 'published' ? 'selected' : '' }}>Published</option>
                         <option value="draft" {{ ($post->status ?? '') === 'draft' ? 'selected' : '' }}>Draft</option>
+                        <option value="archived" {{ ($post->status ?? '') === 'archived' ? 'selected' : '' }}>Archived (Hidden from Public)</option>
                     </select>
+                </div>
+
+                <!-- Separate Publish Date & Publish Time with Set Now -->
+                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-slate-700 text-xs uppercase">Publish Schedule</span>
+                        <button type="button" @click="setNow()" class="text-xs text-emerald-600 hover:underline font-semibold">
+                            Set Current Time
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Date</label>
+                            <input type="date" name="publish_date" x-model="pubDate" class="w-full px-2.5 py-1.5 border rounded-lg bg-white text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1">Time (HH:MM:SS)</label>
+                            <input type="time" step="1" name="publish_time" x-model="pubTime" class="w-full px-2.5 py-1.5 border rounded-lg bg-white text-xs">
+                        </div>
+                    </div>
                 </div>
 
                 @if(in_array($type, ['news', 'service']))
@@ -213,21 +273,103 @@
     </div>
 </form>
 
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script>
 function rankMathSeo(initial) {
     return {
         title: initial.title,
         slug: initial.slug,
+        slugEdited: initial.slug.length > 0,
         body: initial.body,
         keyword: initial.keyword,
         metaTitle: initial.metaTitle,
         metaDesc: initial.metaDesc,
         hasImage: initial.hasImage,
+        pubDate: initial.pubDate,
+        pubTime: initial.pubTime,
+        uploadingImage: false,
+        init() {
+            const editorEl = document.getElementById('quill-editor');
+            if (!editorEl) return;
+
+            const quill = new Quill(editorEl, {
+                theme: 'snow',
+                placeholder: 'Write your article or content here...',
+                modules: {
+                    toolbar: {
+                        container: [
+                            [{ 'header': [1, 2, 3, 4, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'align': [] }],
+                            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                            ['blockquote', 'link', 'image', 'video'],
+                            ['clean']
+                        ],
+                        handlers: {
+                            image: () => {
+                                const input = document.createElement('input');
+                                input.setAttribute('type', 'file');
+                                input.setAttribute('accept', 'image/*');
+                                input.click();
+
+                                input.onchange = async () => {
+                                    const file = input.files[0];
+                                    if (!file) return;
+
+                                    this.uploadingImage = true;
+                                    const formData = new FormData();
+                                    formData.append('image', file);
+
+                                    try {
+                                        const res = await fetch('{{ route("admin.editor.upload") }}', {
+                                            method: 'POST',
+                                            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                            body: formData
+                                        });
+                                        const data = await res.json();
+                                        if (data.url) {
+                                            const range = quill.getSelection(true);
+                                            quill.insertEmbed(range.index, 'image', data.url);
+                                            quill.setSelection(range.index + 1);
+                                        }
+                                    } catch (e) {
+                                        alert('Image upload failed. Max 5MB allowed.');
+                                    } finally {
+                                        this.uploadingImage = false;
+                                    }
+                                };
+                            }
+                        }
+                    }
+                }
+            });
+
+            quill.on('text-change', () => {
+                this.body = quill.root.innerHTML;
+            });
+        },
+        setNow() {
+            const now = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            this.pubDate = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+            this.pubTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+        },
+        autoSlug() {
+            if (!this.slugEdited) {
+                this.slug = this.title.trim()
+                    .replace(/[^\p{L}\p{N}\s\-]+/gu, '')
+                    .replace(/[\s\-]+/gu, '-')
+                    .replace(/^-+|-+$/g, '')
+                    .toLowerCase();
+            }
+        },
         get checks() {
             const kw = this.keyword.trim().toLowerCase();
             const t = (this.metaTitle || this.title).toLowerCase();
             const d = this.metaDesc.toLowerCase();
-            const words = this.body.trim().split(/\s+/).filter(Boolean).length;
+            const plainText = this.body.replace(/<[^>]*>/g, ' ').trim();
+            const words = plainText.split(/\s+/).filter(Boolean).length;
             return {
                 keywordInTitle: kw.length > 0 && t.includes(kw),
                 keywordInDesc: kw.length > 0 && d.includes(kw),

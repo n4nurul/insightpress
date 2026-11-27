@@ -6,7 +6,6 @@ use App\Core\Services\CmsDataService;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Post;
-use Illuminate\Support\Facades\Cache;
 
 class ThemeRenderController extends Controller
 {
@@ -21,6 +20,7 @@ class ThemeRenderController extends Controller
 
     public function category(string $slug)
     {
+        $slug = urldecode($slug);
         $category = Category::where('slug', $slug)->where('is_active', true)->firstOrFail();
         $posts = Post::published()
             ->where('category_id', $category->id)
@@ -37,6 +37,7 @@ class ThemeRenderController extends Controller
 
     public function single(string $slug)
     {
+        $slug = urldecode($slug);
         $post = Post::published()->with(['category', 'author'])->where('slug', $slug)->firstOrFail();
         $post->increment('views_count');
 

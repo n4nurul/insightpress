@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Core\Services\MediaService;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -46,6 +47,7 @@ class SettingController extends Controller
             'meta_data' => array_merge($meta, $inputs),
         ]);
 
+        Cache::forget('cms_global_settings');
         return back()->with('success', 'Settings saved successfully.');
     }
 }
