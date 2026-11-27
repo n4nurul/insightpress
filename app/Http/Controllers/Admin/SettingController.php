@@ -46,6 +46,6 @@ class SettingController extends Controller
             'meta_data' => array_merge($meta, $inputs),
         ]);
 
-        return back()->with('success', 'সেটিংস সফলভাবে আপডেট হয়েছে।');
+        return back()->with('success', 'Settings saved successfully.');
     }
 }

@@ -1,27 +1,27 @@
 @extends('layouts.admin')
-@section('title', 'কন্টেন্ট তালিকা (' . strtoupper($type) . ')')
+@section('title', 'Content List (' . strtoupper($type) . ')')
 
 @section('content')
 <div class="bg-white rounded-xl border border-slate-200 overflow-hidden">
     <div class="p-4 border-b flex flex-wrap items-center justify-between gap-3">
         <form class="flex gap-2">
             <input type="hidden" name="type" value="{{ $type }}">
-            <input type="text" name="search" value="{{ request('search') }}" placeholder="শিরোনাম দিয়ে খুঁজুন..." class="px-3 py-1.5 border rounded-lg text-sm">
-            <button class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-sm">খুঁজুন</button>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by title..." class="px-3 py-1.5 border rounded-lg text-sm">
+            <button class="px-3 py-1.5 bg-slate-800 text-white rounded-lg text-sm">Search</button>
         </form>
-        <a href="{{ route('admin.posts.create', ['type' => $type]) }}" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold">+ নতুন যোগ করুন</a>
+        <a href="{{ route('admin.posts.create', ['type' => $type]) }}" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold">+ Add New</a>
     </div>
 
     <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
             <thead class="bg-slate-50 border-b text-slate-600">
                 <tr>
-                    <th class="px-5 py-3">ছবি</th>
-                    <th class="px-5 py-3">শিরোনাম / নাম</th>
-                    <th class="px-5 py-3">ক্যাটাগরি / তথ্য</th>
-                    <th class="px-5 py-3">SEO স্কোর</th>
-                    <th class="px-5 py-3">স্ট্যাটাস</th>
-                    <th class="px-5 py-3 text-right">অ্যাকশন</th>
+                    <th class="px-5 py-3">Image</th>
+                    <th class="px-5 py-3">Title / Name</th>
+                    <th class="px-5 py-3">Category / Info</th>
+                    <th class="px-5 py-3">SEO Score</th>
+                    <th class="px-5 py-3">Status</th>
+                    <th class="px-5 py-3 text-right">Action</th>
                 </tr>
             </thead>
             <tbody class="divide-y">
@@ -48,20 +48,20 @@
                         </span>
                     </td>
                     <td class="px-5 py-3">
-                        <span class="px-2 py-0.5 rounded-full text-xs {{ $post->status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700' }}">
+                        <span class="px-2 py-0.5 rounded-full text-xs capitalize {{ $post->status === 'published' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700' }}">
                             {{ $post->status }}
                         </span>
                     </td>
                     <td class="px-5 py-3 text-right space-x-2">
-                        <a href="{{ route('admin.posts.edit', $post) }}" class="text-blue-600 hover:underline font-medium">এডিট</a>
-                        <form action="{{ route('admin.posts.destroy', $post) }}" method="POST" class="inline" onsubmit="return confirm('নিশ্চিত ডিলিট করবেন?')">
+                        <a href="{{ route('admin.posts.edit', $post) }}" class="text-blue-600 hover:underline font-medium">Edit</a>
+                        <form action="{{ route('admin.posts.destroy', $post) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this item?')">
                             @csrf @method('DELETE')
-                            <button class="text-rose-600 hover:underline font-medium">ডিলিট</button>
+                            <button class="text-rose-600 hover:underline font-medium">Delete</button>
                         </form>
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">কোনো ডাটা পাওয়া যায়নি।</td></tr>
+                <tr><td colspan="6" class="px-5 py-8 text-center text-slate-400">No records found.</td></tr>
                 @endforelse
             </tbody>
         </table>

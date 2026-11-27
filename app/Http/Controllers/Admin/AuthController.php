@@ -28,7 +28,7 @@ class AuthController extends Controller
             return redirect()->intended(route('admin.dashboard'));
         }
 
-        return back()->withErrors(['email' => 'ইমেইল বা পাসওয়ার্ড সঠিক নয়।'])->onlyInput('email');
+        return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
     }
 
     public function logout(Request $request)

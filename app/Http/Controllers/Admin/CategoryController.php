@@ -44,12 +44,12 @@ class CategoryController extends Controller
             'meta_description' => $data['meta_description'] ?? null,
         ]);
 
-        return back()->with('success', 'ক্যাটাগরি সফলভাবে যুক্ত হয়েছে।');
+        return back()->with('success', 'Category added successfully.');
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
-        return back()->with('success', 'ক্যাটাগরি ডিলিট করা হয়েছে।');
+        return back()->with('success', 'Category deleted successfully.');
     }
 }

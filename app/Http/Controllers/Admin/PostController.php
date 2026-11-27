@@ -56,7 +56,7 @@ class PostController extends Controller
         Post::create($data);
 
         return redirect()->route('admin.posts.index', ['type' => $data['type']])
-            ->with('success', 'সফলভাবে সংরক্ষণ করা হয়েছে।');
+            ->with('success', 'Published successfully.');
     }
 
     public function edit(Post $post)
@@ -90,7 +90,7 @@ class PostController extends Controller
         $post->update($data);
 
         return redirect()->route('admin.posts.index', ['type' => $post->type])
-            ->with('success', 'সফলভাবে আপডেট করা হয়েছে।');
+            ->with('success', 'Updated successfully.');
     }
 
     public function destroy(Post $post)
@@ -100,7 +100,7 @@ class PostController extends Controller
         $post->delete();
 
         return redirect()->route('admin.posts.index', ['type' => $type])
-            ->with('success', 'ডিলিট করা হয়েছে।');
+            ->with('success', 'Deleted successfully.');
     }
 
     protected function validatePost(Request $request): array
