@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Category;
+use Illuminate\Http\Request;
+
+class CategoryController extends Controller
+{
+    public function index()
+    {
+        $categories = Category::with('parent')->orderBy('sort_order')->get();
+        $parents = Category::whereNull('parent_id')->orderBy('sort_order')->get();
+        return view('admin.categories.index', compact('categories', 'parents'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'parent_id' => 'nullable|exists:categories,id',
+            'type' => 'required|in:news,service',
+            'sort_order' => 'nullable|integer',
+            'show_in_menu' => 'nullable|boolean',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+        ]);
+
+        $slug = bn_slug($data['name']);
+        if (Category::where('slug', $slug)->exists()) {
+            $slug .= '-' . rand(10, 99);
+        }
+
+        Category::create([
+            'name' => $data['name'],
+            'slug' => $slug,
+            'parent_id' => $data['parent_id'] ?? null,
+            'type' => $data['type'],
+            'sort_order' => $data['sort_order'] ?? 0,
+            'show_in_menu' => $request->boolean('show_in_menu'),
+            'is_active' => true,
+            'meta_title' => $data['meta_title'] ?? null,
+            'meta_description' => $data['meta_description'] ?? null,
+        ]);
+
+        return back()->with('success', 'ক্যাটাগরি সফলভাবে যুক্ত হয়েছে।');
+    }
+
+    public function destroy(Category $category)
+    {
+        $category->delete();
+        return back()->with('success', 'ক্যাটাগরি ডিলিট করা হয়েছে।');
+    }
+}
