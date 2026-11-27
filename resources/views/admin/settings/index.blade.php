@@ -17,6 +17,8 @@
             <div>
                 <label class="block font-semibold mb-1">Active Frontend Theme</label>
                 <select name="active_theme" class="w-full px-3 py-2 border rounded-lg">
+                    <option value="sylhet-view" {{ ($settings['active_theme'] ?? '') === 'sylhet-view' ? 'selected' : '' }}>SylhetView24 Style (3-Col Portal)</option>
+                    <option value="sylhet-modern" {{ ($settings['active_theme'] ?? '') === 'sylhet-modern' ? 'selected' : '' }}>Sylhet Today Modern (Regional Portal)</option>
                     <option value="news-classic" {{ ($settings['active_theme'] ?? 'news-classic') === 'news-classic' ? 'selected' : '' }}>News Classic (Default)</option>
                     <option value="corporate-clean" {{ ($settings['active_theme'] ?? '') === 'corporate-clean' ? 'selected' : '' }}>Corporate Clean</option>
                 </select>
@@ -95,4 +97,33 @@
         Save All Settings
     </button>
 </form>
+
+    <!-- Technical SEO & Sitemaps Box -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs mt-6">
+        <h3 class="text-base font-bold text-slate-900 mb-1">Technical SEO & Google Sitemaps</h3>
+        <p class="text-xs text-slate-500 mb-4">Submit these auto-updating URLs to Google Search Console & Google News Publisher Center.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-bold text-slate-700 mb-1">Main XML Sitemap</div>
+                <div class="flex items-center justify-between gap-2">
+                    <a href="{{ url('/sitemap.xml') }}" target="_blank" class="text-blue-600 hover:underline truncate">{{ url('/sitemap.xml') }}</a>
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ url('/sitemap.xml') }}'); this.innerText='Copied!'" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold shrink-0 cursor-pointer">Copy</button>
+                </div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-bold text-slate-700 mb-1">Google News Sitemap (48h)</div>
+                <div class="flex items-center justify-between gap-2">
+                    <a href="{{ url('/news-sitemap.xml') }}" target="_blank" class="text-blue-600 hover:underline truncate">{{ url('/news-sitemap.xml') }}</a>
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ url('/news-sitemap.xml') }}'); this.innerText='Copied!'" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold shrink-0 cursor-pointer">Copy</button>
+                </div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="font-bold text-slate-700 mb-1">Dynamic Robots.txt</div>
+                <div class="flex items-center justify-between gap-2">
+                    <a href="{{ url('/robots.txt') }}" target="_blank" class="text-blue-600 hover:underline truncate">{{ url('/robots.txt') }}</a>
+                    <button type="button" onclick="navigator.clipboard.writeText('{{ url('/robots.txt') }}'); this.innerText='Copied!'" class="px-2 py-1 bg-white border border-slate-300 rounded font-semibold shrink-0 cursor-pointer">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

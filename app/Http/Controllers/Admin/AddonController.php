@@ -26,8 +26,26 @@ class AddonController extends Controller
             ],
             'photocard' => [
                 'name' => 'Social Photocard Generator',
-                'description' => 'Allows logged-in authors, editors, and admins to generate & download 1080x1080 branded Facebook news photocards from the backend post menu.',
+                'description' => 'Allows logged-in authors, editors, and admins to generate & download 1080x1080 branded Facebook news photocards.',
                 'category' => 'Social Media',
+                'default' => true,
+            ],
+            'google_news_sitemap' => [
+                'name' => 'Google News Sitemap (48h XML)',
+                'description' => 'Generates a dedicated Google News Publisher Center XML feed (/news-sitemap.xml) for articles published in the last 48 hours.',
+                'category' => 'Premium SEO',
+                'default' => false,
+            ],
+            'schema_seo' => [
+                'name' => 'NewsArticle JSON-LD Schema',
+                'description' => 'Injects rich NewsArticle structured data markup for Google Discover and Top Stories eligibility.',
+                'category' => 'Premium SEO',
+                'default' => true,
+            ],
+            'team_page' => [
+                'name' => 'Reporters & Editorial Team Directory',
+                'description' => 'Enables the public /team directory page showcasing editors, staff reporters, and district correspondents.',
+                'category' => 'Newsroom',
                 'default' => true,
             ],
         ];

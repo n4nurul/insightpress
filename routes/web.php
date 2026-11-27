@@ -26,7 +26,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('/posts/{post}/approve', [DashboardController::class, 'approvePost'])->name('posts.approve');
     Route::post('/quick-breaking', [DashboardController::class, 'saveQuickBreaking'])->name('quick-breaking.save');
     Route::post('/clear-cache', [DashboardController::class, 'clearCache'])->name('clear-cache');
-    Route::resource('categories', CategoryController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('posts/bulk', [PostController::class, 'bulkAction'])->name('posts.bulk');
     Route::resource('posts', PostController::class)->except(['show']);
     Route::post('posts/{post}/archive', [PostController::class, 'archive'])->name('posts.archive');
@@ -53,8 +53,13 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 });
 
 // Public Frontend & SEO Routes
+
+// SEO Sitemaps & Robots
+Route::get('/sitemap.xml', [\App\Http\Controllers\Frontend\SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/news-sitemap.xml', [\App\Http\Controllers\Frontend\SeoController::class, 'newsSitemap'])->name('seo.news_sitemap');
+Route::get('/robots.txt', [\App\Http\Controllers\Frontend\SeoController::class, 'robots'])->name('seo.robots');
+
 Route::get('/', [ThemeRenderController::class, 'index'])->name('home');
-Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/team', [ThemeRenderController::class, 'team'])->name('team.index');
 Route::get('/category/{slug}', [ThemeRenderController::class, 'category'])->name('category.show');
 Route::get('/{slug}', [ThemeRenderController::class, 'single'])->name('post.show');

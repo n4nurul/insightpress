@@ -66,6 +66,7 @@ class ThemeRenderController extends Controller
 
     public function team()
     {
+        abort_unless(cms_addon('team_page', true), 404);
         $members = Post::published()->where('type', 'team')->orderBy('id')->get();
         return theme_view('team', [
             'members' => $members,
